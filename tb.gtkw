@@ -1,0 +1,27 @@
+[*]
+[*] GTKWave Analyzer v3.3.107 (w)1999-2020 BSI
+[*] Sat Sep 24 08:55:20 2022
+[*]
+[dumpfile] "/Users/qn/Code/FPGA/dac8814/tb.vcd"
+[dumpfile_mtime] "Sat Sep 24 08:55:15 2022"
+[dumpfile_size] 23765707
+[savefile] "/Users/qn/Code/FPGA/dac8814/tb.gtkw"
+[timestart] 385700000
+[size] 1309 600
+[pos] -1 -1
+*-23.000000 1027000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[sst_width] 193
+[signals_width] 124
+[sst_expanded] 1
+[sst_vpaned_height] 167
+@28
+tb.i2s_init.bck_o
+tb.i2s_init.left_audio
+tb.i2s_init.right_audio
+tb.i2s_init.state[1:0]
+tb.i2s_init.sdo
+@23
+tb.i2s_init.r_val[15:0]
+[pattern_trace] 1
+[pattern_trace] 0
