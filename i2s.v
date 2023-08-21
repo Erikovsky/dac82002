@@ -116,11 +116,10 @@ always @(negedge bck_o) begin
                 end
             end
             else if (state_r == L_DONE) begin
-                l_val <= val + 16'h8000;
-                // if (val[BIT-1] == 1)
-                //     l_val <= val - 16'h8000;
-                // else
-                //     l_val <= val + 16'h8000;
+                if (val[BIT-1] == 1)
+                    l_val <= val - 16'h8000;
+                else
+                    l_val <= val + 16'h8000;
 
                 state_r <= IDLE;
             end
