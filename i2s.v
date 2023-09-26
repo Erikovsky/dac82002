@@ -13,7 +13,7 @@ module i2s(
 
     output reg          sdo,
     output reg          sync,
-    output reg          sclk 
+    output              sclk 
 );
 
 localparam  BIT = 24;
@@ -67,80 +67,77 @@ always @(negedge bck_o) begin
         state_r <= IDLE;
         count <= 0;
 
-        val <= 1<<BIT-1;
-        l_val <= 1<<BIT-1;
-        r_val <= 1<<BIT-1;
+        val <= 0;
+        val_r <= 0;
+        val_rr <= 0;
+        l_val <= 0;
+        r_val <= 0;
 
         data_r <= 0;
     end
     else begin
         data_r <= data_i;
-
-        if (right_start) begin
+        if (right_start)
             state_r <= R_TRANSFER;
-        end
-        else if (left_start) begin
+        else if (left_start)
             state_r <= L_TRANSFER;
-        end
         else begin
-            if (state_r == IDLE) begin 
-                val <= 0;
-                val_r <= val;
-                val_rr <= val_r;
-            end
-            else if (state_r == R_TRANSFER) begin
-                if (count == E) begin
-                    count <= 0;
-                    state_r <= R_DONE;
+            case(state_r)
+                IDLE:
+                    val <= 0;
+                R_TRANSFER: begin
+                    if (count == E) begin
+                        count <= 0;
+                        state_r <= R_DONE;
+                    end
+                    else if (count < E) begin
+                        // val <= {val, data_r};
+                        val <= {val, data_i};
+                        count <= count + 1;
+                    end
                 end
-                else if (count < E) begin
-                    // val <= {val, data_r};
-                    val <= {val, data_i};
-                    count <= count + 1;
-                end
-            end
-            else if (state_r == R_DONE) begin
-                //dithering
-                r_val <= {~val[BIT-1], val[BIT-2:0]} + val_r[8:0] - val_rr[8:0];
-                // r_val <= {~val[BIT-1], val[BIT-2:0]};
+                R_DONE: begin
+                    //dithering
+                    // r_val <= {~val[BIT-1], val[BIT-2:0]} + val_r[8:0] - val_rr[8:0];
+                    val_r <= val;
+                    val_rr <= val_r;
+                    r_val <= {~val[BIT-1], val[BIT-2:0]};
 
-                state_r <= IDLE;
-            end
-            else if (state_r == L_TRANSFER) begin
-                if (count == E) begin
-                    count <= 0;
-                    state_r <= L_DONE;
+                    state_r <= IDLE;
                 end
-                else if (count < E) begin
-                    // val <= {val, data_r};
-                    val <= {val, data_i};
-                    count <= count + 1;
+                L_TRANSFER: begin
+                    if (count == E) begin
+                        count <= 0;
+                        state_r <= L_DONE;
+                    end
+                    else if (count < E) begin
+                        // val <= {val, data_r};
+                        val <= {val, data_i};
+                        count <= count + 1;
+                    end
                 end
-            end
-            else if (state_r == L_DONE) begin
-                l_val <= {~val[BIT-1], val[BIT-2:0]} + val_r[8:0] - val_rr[8:0];
-                // l_val <= {~val[BIT-1], val[BIT-2:0]};
-                state_r <= IDLE;
-            end
+                L_DONE: begin
+                    // l_val <= {~val[BIT-1], val[BIT-2:0]} + val_r[8:0] - val_rr[8:0];
+                    l_val <= {~val[BIT-1], val[BIT-2:0]};
+                    state_r <= IDLE;
+                end
+            endcase
         end
     end
 end
-
-assign sclk = bck_o;
 
 localparam  WORD = 24;
 reg [3:0]       state_w;
 reg [5:0]       count_w;
 reg [31:0]      key;
+assign sclk = bck_i;
 
-always @(posedge bck_o) begin
+always @(posedge sclk) begin
     if (!rstn)  begin
-        state_w <= IDLE;
         count_w <= 0;
-        key <= {8'h06, val};
 
-        sync <= 0;
-        sdo <= 0;
+        key <= {8'h06, 24'hffffff};
+        state_w <= FLASH;
     end
     else if (left_start) begin
         key <= {8'h08, l_val};
